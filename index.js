@@ -1,2 +1,9 @@
 #!/usr/bin/env node
-console.log('Hello, world!');
+
+global.Promise = require('bluebird');
+const program = require('commander');
+
+require('./commands/new')(program);
+require('./commands/start')(program);
+
+program.parse(process.argv);
