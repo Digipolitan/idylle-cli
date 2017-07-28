@@ -116,6 +116,7 @@ module.exports = (p) => {
                 '        )\n' +
                 '\n' +
                 '        .post(\'/\',\n' +
+                '            app.middlewares.bodyParser.json(),\n' +
                 `            app.actions.${pluralizedResource}.create.expose()\n` +
                 '        )\n' +
                 '\n' +
