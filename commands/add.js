@@ -2,6 +2,7 @@ const fs = require('fs-extra');
 const Promise = require('bluebird');
 const _ = require('lodash');
 const pluralize = require('pluralize');
+const path = require('path');
 
 module.exports = (p) => {
     program = p;
@@ -71,9 +72,19 @@ module.exports = (p) => {
                 return Promise.each(CRUDFiles, create);
 
                 function create(file) {
+                    const model = _.capitalize(resource);
+
                     return new Promise((resolve, reject) => {
                         const filePath = path.join(actionDirectoryPath, file);
-                        fs.writeFile(filePath, '', (err, data) => (err) ? reject(err) : resolve(data))
+                        fs.writeFile(filePath, 'module.exports = app => {\n' +
+                            `    const ${model} = app.models.${model};\n` +
+                            '    \n' +
+                            '    return Action({\n' +
+                            '        execute: context => {\n' +
+                            '\n' +
+                            '        }\n' +
+                            '    });\n' +
+                            '};\n', (err, data) => (err) ? reject(err) : resolve(data))
                     });
                 }
             }
@@ -116,11 +127,9 @@ module.exports = (p) => {
                 `            app.actions.${pluralizedResource}.remove.expose()\n` +
                 '        );\n' +
                 '\n' +
-                '    app.server.use(\'models\', router);\n' +
+                `    app.server.use(/'${pluralizedResource}, router);\n` +
                 '};')
         }
     }
 };
-
-
 
