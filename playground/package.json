@@ -1,0 +1,23 @@
+{
+  "name": "idylle-default-archetype",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/julien-sarazin/idylle-default-archetype.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/julien-sarazin/idylle-default-archetype/issues"
+  },
+  "homepage": "https://github.com/julien-sarazin/idylle-default-archetype#readme",
+  "dependencies": {
+    "idylle": "^1.10.2"
+  }
+}
