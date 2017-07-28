@@ -127,7 +127,7 @@ module.exports = (p) => {
                 `            app.actions.${pluralizedResource}.remove.expose()\n` +
                 '        );\n' +
                 '\n' +
-                `    app.server.use(/'${pluralizedResource}, router);\n` +
+                `    app.server.use('/${pluralizedResource}', router);\n` +
                 '};')
         }
     }
