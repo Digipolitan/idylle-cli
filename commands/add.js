@@ -95,7 +95,7 @@ module.exports = (p) => {
             const routePath = path.join(ROUTES_DIRECTORY, `${_.lowerCase(pluralizedResource)}.js`);
 
             return fs.writeFile(routePath, 'module.exports = app => {\n' +
-                '    const router = app.server.Router();\n' +
+                '    const router = app.Router();\n' +
                 '\n' +
                 '    router\n' +
                 '\n' +

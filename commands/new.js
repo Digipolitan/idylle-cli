@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs-extra');
 const https = require('https');
 const decompress = require('decompress');
+const _ = require('lodash');
 // External resources
 const ArchetypesRepositories = require('./ArchetypesRepositories');
 
@@ -19,6 +20,7 @@ let program = null;
  ****************************/
 class DirectoryNotFoundError extends Error {
 }
+
 class DirectoryNotEmptyError extends Error {
 }
 
@@ -90,11 +92,11 @@ function downloadArchetype() {
 
     return download()
         .then(unzip)
-        .then(clean)
+        .then(clean);
 
     function download() {
         return new Promise((resolve, reject) => {
-            let file = fs.createWriteStream(zipPath, {encoding: 'binary'} );
+            let file = fs.createWriteStream(zipPath, {encoding: 'binary'});
             https.get(ArchetypesRepositories.default, response => {
                 response.pipe(file);
                 file.on('finish', function () {
@@ -108,21 +110,32 @@ function downloadArchetype() {
     }
 
     function unzip() {
-        return decompress(zipPath, projectPath, { map: file => {
-            if (isRoot(file.path)) {
-                rootDir = file.path
-                file.path = '../' + file.path
+        return decompress(zipPath, projectPath, {
+            map: file => {
+                if (isRoot(file.path)) {
+                    rootDir = file.path
+                    file.path = '../' + file.path;
+                    return file;
+                }
+
+                file.path = removeRoot(file.path);
                 return file;
             }
-
-            file.path = removeRoot(file.path);
-            return file;
-        }
         })
     }
 
     function clean() {
         fs.rmdir(rootDir);
+        removeGitKeep(projectPath);
+
+        function removeGitKeep(dirPath) {
+            return fs.readdirSync(dirPath)
+                .forEach(file => fs.statSync(path.join(dirPath, file)).isDirectory()
+                    ? removeGitKeep(path.join(dirPath, file))
+                    : file.indexOf('.gitkeep') !== -1
+                    ? fs.unlink(path.join(dirPath, file))
+                    : _.noop());
+        }
     }
 }
 
@@ -140,12 +153,12 @@ function ensureNone(data) {
 
 
 function isRoot(filePath) {
-    let paths = filePath.split('/')
+    let paths = filePath.split('/');
     return paths[1] === '';
 }
 
 function removeRoot(filePath) {
-    let paths = filePath.split('/')
+    let paths = filePath.split('/');
     delete paths[0];
     return paths.join('/');
 }
