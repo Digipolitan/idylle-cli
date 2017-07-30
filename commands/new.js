@@ -60,6 +60,7 @@ function create(p, options) {
         .then(downloadArchetype)
         .then(unzip)
         .then(clean)
+        .then(() => console.log('done.'))
         .catch(print)
 }
 
@@ -68,8 +69,7 @@ function create(p, options) {
  ****************************/
 
 function ensureDirectoryExists() {
-    projectPath = path.join('.', project)
-    console.log('projectPath', projectPath);
+    projectPath = path.join('.', project);
 
     return fs.access(projectPath)
         .catch(err => {
