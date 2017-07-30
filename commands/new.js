@@ -9,6 +9,7 @@ const _ = require('lodash');
 const ArchetypesRepositories = require('./ArchetypesRepositories');
 
 // Script variables
+const zipPath = '/tmp/archetype.zip';
 let project = null;
 let projectPath = null;
 let archetype = null;
@@ -57,6 +58,8 @@ function create(p, options) {
         .catch(DirectoryNotFoundError, createDirectory)
         .then(ensureDirectoryEmpty)
         .then(downloadArchetype)
+        .then(unzip)
+        .then(clean)
         .catch(print)
 }
 
@@ -87,55 +90,48 @@ function ensureDirectoryEmpty() {
 }
 
 function downloadArchetype() {
-    const zipPath = '/tmp/archetype.zip';
-    let rootDir = null;
-
-    return download()
-        .then(unzip)
-        .then(clean);
-
-    function download() {
-        return new Promise((resolve, reject) => {
-            let file = fs.createWriteStream(zipPath, {encoding: 'binary'});
-            https.get(ArchetypesRepositories.default, response => {
-                response.pipe(file);
-                file.on('finish', function () {
-                    file.close(() => resolve());  // close() is async, call cb after close completes.
-                });
-            }).on('error', err => {
-                fs.unlink(zipPath); // Delete the file async. (But we don't check the result)
-                reject(err)
+    return new Promise((resolve, reject) => {
+        let file = fs.createWriteStream(zipPath, {encoding: 'binary'});
+        https.get(ArchetypesRepositories.default, response => {
+            response.pipe(file);
+            file.on('finish', function () {
+                file.close(() => resolve());  // close() is async, call cb after close completes.
             });
+        }).on('error', err => {
+            fs.unlink(zipPath); // Delete the file async. (But we don't check the result)
+            reject(err)
         });
-    }
+    });
+}
 
-    function unzip() {
-        return decompress(zipPath, projectPath, {
-            map: file => {
-                if (isRoot(file.path)) {
-                    rootDir = file.path
-                    file.path = '../' + file.path;
-                    return file;
-                }
-
-                file.path = removeRoot(file.path);
+function unzip() {
+    let rootDir = null;
+    return decompress(zipPath, projectPath, {
+        map: file => {
+            if (isRoot(file.path)) {
+                rootDir = file.path;
+                file.path = '../' + file.path;
                 return file;
             }
-        })
-    }
 
-    function clean() {
-        fs.rmdir(rootDir);
-        removeGitKeep(projectPath);
+            file.path = removeRoot(file.path);
+            return file;
+        }
+    })
+        .then(() => rootDir);
+}
 
-        function removeGitKeep(dirPath) {
-            return fs.readdirSync(dirPath)
-                .forEach(file => fs.statSync(path.join(dirPath, file)).isDirectory()
-                    ? removeGitKeep(path.join(dirPath, file))
-                    : file.indexOf('.gitkeep') !== -1
+function clean(rootDir) {
+    fs.rmdir(rootDir);
+    return removeGitKeep(projectPath);
+
+    function removeGitKeep(dirPath) {
+        return fs.readdirSync(dirPath)
+            .forEach(file => fs.statSync(path.join(dirPath, file)).isDirectory()
+                ? removeGitKeep(path.join(dirPath, file))
+                : file.indexOf('.gitkeep') !== -1
                     ? fs.unlink(path.join(dirPath, file))
                     : _.noop());
-        }
     }
 }
 
