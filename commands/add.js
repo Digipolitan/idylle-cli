@@ -49,7 +49,7 @@ module.exports = (p) => {
         function createModel() {
             const modelPath = path.join(MODELS_DIRECTORY, `${_.capitalize(resource)}.js`);
 
-            return fs.writeFile(modelPath, 'module.exports = {};')
+            return fs.writeFile(modelPath, 'module.exports = app => {};')
         }
 
         function createActions() {
@@ -61,7 +61,6 @@ module.exports = (p) => {
             function addCRUD() {
                 const CRUDFiles = [
                     'show.js',
-                    'search.js',
                     'list.js',
                     'count.js',
                     'create.js',
@@ -103,16 +102,12 @@ module.exports = (p) => {
                 `            app.actions.${pluralizedResource}.list.expose()\n` +
                 '        )\n' +
                 '\n' +
-                '        .get(\'/:id\',\n' +
-                `            app.actions.${pluralizedResource}.show.expose()\n` +
-                '        )\n' +
-                '\n' +
-                '        .get(\'/search\',\n' +
-                `            app.actions.${pluralizedResource}.search.expose()\n` +
-                '        )\n' +
-                '\n' +
                 '        .get(\'/count\',\n' +
                 `            app.actions.${pluralizedResource}.count.expose()\n` +
+                '        )\n' +
+                '\n' +
+                '        .get(\'/:id\',\n' +
+                `            app.actions.${pluralizedResource}.show.expose()\n` +
                 '        )\n' +
                 '\n' +
                 '        .post(\'/\',\n' +
@@ -120,12 +115,12 @@ module.exports = (p) => {
                 `            app.actions.${pluralizedResource}.create.expose()\n` +
                 '        )\n' +
                 '\n' +
-                '        .put(\'/\',\n' +
+                '        .put(\'/:id\',\n' +
                 '            app.middlewares.bodyParser.json(),\n' +
                 `            app.actions.${pluralizedResource}.update.expose()\n` +
                 '        )\n' +
                 '\n' +
-                '        .delete(\'/\',\n' +
+                '        .delete(\'/:id\',\n' +
                 `            app.actions.${pluralizedResource}.remove.expose()\n` +
                 '        );\n' +
                 '\n' +
