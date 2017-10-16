@@ -75,7 +75,9 @@ module.exports = (p) => {
 
                     return new Promise((resolve, reject) => {
                         const filePath = path.join(actionDirectoryPath, file);
-                        fs.writeFile(filePath, 'module.exports = app => {\n' +
+                        fs.writeFile(filePath, 'const Action = require(\'idylle\').Action\n' +
+                            '\n' +
+                            'module.exports = app => {\n' +
                             `    const ${model} = app.models.${model};\n` +
                             '    \n' +
                             '    return Action({\n' +
