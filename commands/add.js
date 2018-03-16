@@ -81,6 +81,7 @@ module.exports = (p) => {
                             `    const ${model} = app.models.${model};\n` +
                             '    \n' +
                             '    return Action({\n' +
+                            '        rules: [], \n' +
                             '        execute: context => {\n' +
                             '\n' +
                             '        }\n' +
@@ -126,7 +127,7 @@ module.exports = (p) => {
                 `            app.actions.${pluralizedResource}.remove.expose()\n` +
                 '        );\n' +
                 '\n' +
-                `    app.server.use('/${pluralizedResource}', router);\n` +
+                `    app.router.use('/${pluralizedResource}', router);\n` +
                 '};')
         }
     }
